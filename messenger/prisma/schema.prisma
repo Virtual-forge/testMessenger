@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Monobot {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?   @unique
+  api_key         String?
+  tokens          Int?
+  website         String?
+
+}
+
+model Webscrap {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  url            String?    
+  username       String?  @unique
+  chunks         Int?    
+  summary        String?
+  extraInfo      String?
+}
+
+
+model Chunks{
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  text            String?
+  webscrapId      String?
+  vectors         Float[]   
+}
+
+
+model History {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  username        String?   @unique
+  api_key         String?
+  chat         String?
+
+}

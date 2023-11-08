@@ -1,7 +1,7 @@
 'use client'
 import { Input } from 'postcss'
 import React, { useState } from 'react'
-
+import axios from 'axios'
 function ChatInput ()  {
 const [input,setInput] = useState('');
 const [chatLog,setChatLog] = useState([]);
@@ -12,24 +12,29 @@ const addMessage = (e:React.FormEvent<HTMLFormElement>) =>{
   if(!input) return;
   const messageToSend = input;
   setChatLog((prevChatLog) => [...prevChatLog , {type:'user' , message:messageToSend}]);
-  
-  //add gpt answer here
-  const botmessage = 'bot message';
-  setChatLog((prevChatLog) => [...prevChatLog , {type:'bot' , message:botmessage}]);
-  setInput("");
+  const user_name = 'w';
+  axios.post('../api/getBotMessage',{
+    username : user_name,
+    input : messageToSend
+  }).then(function (response){
+    setChatLog((prevChatLog) => [...prevChatLog , {type:'bot' , message:response.data}]);
+    setInput("");
+  })
+  // const botmessage = 'bot message';
+  // setChatLog((prevChatLog) => [...prevChatLog , {type:'bot' , message:botmessage}]);
+  // setInput("");
 }
   return (
     <div className='flex flex-col  h-screen bg-gray-900 '>
       <div className='flex flex-grow justify-center p-6'>
-        <div className='flex flex-col  space-y-2 '>
+        <div className='flex flex-col  min-w-[500px]   space-y-2 '>
           {chatLog.map((message,index) => (
-            <div key="index" 
-            className={`flex ${
-              message.type === 'user' ? '  justify-end bg-blue-600  ' : 'justify-start bg-green-600'
-            }`}
-            >
+            <div key={index} className={`flex   ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <p className={`rounded-lg p-2 break-words max-w-md ${message.type === 'user' ? 'bg-blue-600 ' : 'bg-green-600'}`}>
               {message.message}
-            </div>
+            </p>
+          </div>
+          
           ))}
         </div>
       </div>
