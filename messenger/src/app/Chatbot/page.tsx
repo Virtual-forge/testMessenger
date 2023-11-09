@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Formulaire from './components/Formulaire'
+import ChatInput from '../components/ChatInput'
 
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
         <h1 className='flex-grow text-center font-bold text-2xl text-white'>MonoBot</h1>
       </div>
       <div className='container mx-auto'>
-      <Formulaire />
+      <ChatInput />
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ const addMessage = (e:React.FormEvent<HTMLFormElement>) =>{
   if(!input) return;
   const messageToSend = input;
   setChatLog((prevChatLog) => [...prevChatLog , {type:'user' , message:messageToSend}]);
-  const user_name = 'w';
+  const user_name = 'webtest';
   axios.post('../api/getBotMessage',{
     username : user_name,
     input : messageToSend

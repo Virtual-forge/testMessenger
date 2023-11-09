@@ -6,7 +6,7 @@ const prompt = require('prompt-sync')();
 const addBotChat = require('./controllers/history_save');
 const faiss = require('faiss-node');
 const axios = require('axios');
-// const  learnWebsite  = require('./controllers/scrapper');
+const  learnWebsite  = require('./controllers/scrapper');
 
 
 const key = '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';
@@ -16,20 +16,16 @@ const key = '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';
         const myai = new openai({
             apiKey: key,
         });
-        const stream = await myai.chat.completions.create({
+        const response = await myai.chat.completions.create({
             messages: conversation,
             temperature: 0.2,
             model: 'gpt-3.5-turbo',
-            stream: true,
+            stream: false,
         });
 
-        for await (const part of stream) {
-            const chunkContent = part.choices[0]?.delta?.content || '';
+        const chunkContent = response.choices[0]?.message?.content || '';
             conversation.push({ role: 'assistant', content: chunkContent });
             outputChunks.push(chunkContent);
-            process.stdout.write(chunkContent);
-        }
-
         const fullOutput = outputChunks.join('');
         // addBotChat(fullOutput,username);
         return { conversation, fullOutput };
@@ -49,30 +45,33 @@ const key = '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';
     }
 
 
-    // async function initializebot(ID, key) {
-    //     try {
-    //         console.log('initializing bot ...');
-    //         const thisurl = prompt('give me your website url : ');
+    async function initializebot(ID, key,url) {
+        try {
             
-    //         const chat = await prisma.monobot.create({
-    //            data: {name: ID,
-    //             api_key: key,
-    //             tokens: 0,
-    //             website: thisurl}
-    //         });
             
-    //         console.log( 'chat object :' + chat.name );
-    //         console.log('The bot has been initialized! learning website now ...');
-    //         await learnWebsite(thisurl,chat.name);
-    //         return ID;
+            
+            const chat = await prisma.monobot.create({
+               data: {name: ID,
+                api_key: key,
+                tokens: 0,
+                website: url}
+            });
+            
+            console.log( 'chat object :' + chat.name );
+            console.log('The bot has been initialized! learning website now ...');
+           const response = await learnWebsite(url,chat.name);
+           if ( response == 'success'){
+            return response;
+           }
+            return 'failed to initialize bot';
 
-    //     } catch (error) {
-    //         console.error('Error initializing bot:', error);
-    //     }
-    // }
+        } catch (error) {
+            console.error('Error initializing bot:', error);
+        }
+    }
 
 
-   export default async function  generateResponseWithFile(userInput, username) {
+    async function  generateResponseWithFile(userInput, username) {
     console.log('this is the username : ', username);
     let context = await prisma.webscrap.findUnique({
         where :  { username : username },
@@ -137,4 +136,9 @@ const key = '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';
     }
 
 
-module.exports = {firstResponse} , {generateResponseWithFile},{find_user}
+module.exports = {
+    firstResponse,
+    generateResponseWithFile,
+    find_user,
+    initializebot
+} 

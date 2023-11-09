@@ -21,6 +21,7 @@
     "openai": "^4.0.1",
     "prisma": "^5.3.1",
     "prompt-sync": "^4.2.0",
+    "puppeteer": "^21.5.1",
     "socket.io": "^4.7.2",
     "wink-nlp-utils": "^2.1.0"
   }

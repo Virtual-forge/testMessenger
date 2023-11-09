@@ -1,19 +1,32 @@
 import { NextResponse } from "next/server";
-import generateResponseWithFile from "../../../../back/monochat"
 
-
-export async function POST(
-  request: Request, 
-) {
+export async function POST(request: Request) {
   const body = await request.json();
+  const { username, input } = body;
 
-  const { 
-    username,
-    input
-} = body;
-console.log('this is the username in the route : ' , username)
-const botOutput = await generateResponseWithFile(input,username);
+  try {
+    const botOutputResponse = await fetch('http://localhost:3001/api/generateResponseWithFile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        input,
+      }),
+    });
 
+    if (!botOutputResponse.ok) {
+      console.error('Error fetching bot output:', botOutputResponse.statusText);
+      return NextResponse.json(botOutputResponse.statusText);
+    }
 
-  return NextResponse.json(botOutput);
+    const botOutput = await botOutputResponse.json();
+    console.log('this is the output in the route:', botOutput.fullOutput);
+
+    return NextResponse.json(botOutput.fullOutput);
+  } catch (error) {
+    console.error('Error handling bot output:', error);
+    return NextResponse.json('Internal Server Error');
+  }
 }
