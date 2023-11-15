@@ -45,7 +45,7 @@ const chunkPage = (page,chunklist,url) => {
   }
 }
 
-async function learnWebsite (url , username) {
+async function learnWebsite (url , username , wss) {
   try {
     
     
@@ -95,7 +95,7 @@ async function learnWebsite (url , username) {
 
         const cleanedTextContent = removeDuplicates(textContent.trim().replace(/\s\s+/g, ' '));
         chunkPage(cleanedTextContent,chunklist,link);
-
+        wss.
         console.log(`Text content extracted from: ${link}`); // Log text content extraction
       } catch (linkError) {
         console.error(`Error processing link ${link}: ${linkError}`);

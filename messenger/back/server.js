@@ -6,10 +6,15 @@ const {
     find_user,
     initializebot
 } = require('./monochat');
+
+const http = require('http');
 const { PrismaClient } = require("@prisma/client");
 
+const socketIO = require('socket.io');
 const app = express();
 const port = process.env.PORT || 3001;
+const server = http.createServer(app);
+const io = socketIO(server);
 
 app.use(cors());
 app.use(express.json()); // Use JSON middleware for parsing request bodies
@@ -57,7 +62,7 @@ app.post('/api/initializebot', async (req, res) => {
   const { username , url } = req.body;
   const key = 'key';
   try {
-    const user = await initializebot(username,key,url);
+    const user = await initializebot(username,key,url,wss);
     res.json({ user });
   } catch (error) {
     console.error('Error finding user:', error);

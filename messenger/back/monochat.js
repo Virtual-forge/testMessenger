@@ -45,7 +45,7 @@ const key = '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';
     }
 
 
-    async function initializebot(ID, key,url) {
+    async function initializebot(ID, key,url,wss) {
         try {
             
             
@@ -59,7 +59,7 @@ const key = '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';
             
             console.log( 'chat object :' + chat.name );
             console.log('The bot has been initialized! learning website now ...');
-           const response = await learnWebsite(url,chat.name);
+           const response = await learnWebsite(url,chat.name,wss);
            if ( response == 'success'){
             return response;
            }

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const botOutput = await botOutputResponse.json();
-    console.log('this is the output in the route:', botOutput.fullOutput);
+    // console.log('this is the output in the route:', botOutput.fullOutput);
 
     return NextResponse.json(botOutput.fullOutput);
   } catch (error) {
