@@ -12,7 +12,10 @@ const { PrismaClient } = require("@prisma/client");
 const io = require('socket.io')(3003 , {
   cors:{
     origin: "http://localhost:3000"
-  }
+  },
+  reconnection: true,
+  reconnectionAttempts: 3, // Adjust this as needed
+  reconnectionDelay: 1000, // Adjust this as needed
 });
 
 const app = express();
@@ -42,6 +45,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`socket disconnected ${socket.id}`);
   });
+});
+io.on('disconnect', (reason) => {
+  console.log(`Disconnected from the server: ${reason}`);
+});
+
+io.on('reconnect', (attemptNumber) => {
+  console.log(`Reconnected to the server after ${attemptNumber} attempts`);
 });
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html'); // Update the path accordingly

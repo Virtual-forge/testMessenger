@@ -95,11 +95,11 @@ async function learnWebsite (url , username ,socketId,io) {
 
         const cleanedTextContent = removeDuplicates(textContent.trim().replace(/\s\s+/g, ' '));
         chunkPage(cleanedTextContent,chunklist,link);
-        io.to(socketId).emit('scrapingProgress', `Finished processing link ${link}: ${linkError}`);
+        io.to(socketId).emit('scrapingProgress', `Finished processing link : ${link}`);
         
       } catch (linkError) {
-        
-        io.to(socketId).emit('scrapingProgress', `Error processing link ${link}: ${linkError}`);
+        if(linkError){io.to(socketId).emit('scrapingProgress', `Error processing link ${link}: ${linkError}`);
+      }
         // Continue processing the next link even if there's an error with the current one
         continue;
       }

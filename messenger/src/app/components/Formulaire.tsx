@@ -1,33 +1,35 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Socket } from 'socket.io';
+
 
 function Formulaire() {
   const [progressMessages, setProgressMessages] = useState([]);
   const [username, setUsername] = useState('');
   const [url, setUrl] = useState('');
-
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const [myVariable, setMyVariable] = useState(null);
-    const socket = io('http://localhost:3003');
-
+    let newSocket : Socket;
+    if(!socket){
+      newSocket = io('http://localhost:3003');
+    setSocket(newSocket);
+  }
+  const handleScrapingProgress = (progressMessage) => {
+    console.log(progressMessage);
+    // Update UI by adding the new progress message to the state
+    setProgressMessages((prevMessages) => [...prevMessages, progressMessage]);
+  };
     // Listen for scraping progress
-    socket.on('scrapingProgress', (progressMessage) => {
-      console.log(progressMessage);
-
-      // Update UI by adding the new progress message to the state
-      setProgressMessages((prevMessages) => [...prevMessages, progressMessage]);
-    });
+    socket?.on('scrapingProgress', handleScrapingProgress);
 
     return () => {
-      // Cleanup the socket connection when the component unmounts
-      socket.disconnect();
+      socket?.off('scrapingProgress', handleScrapingProgress);
+      socket?.disconnect();
     };
-  }, []); // Run this effect once on component mount
+  }, [socket]); // Run this effect once on component mount
 
   const handleSubmit = async (e) => {
     

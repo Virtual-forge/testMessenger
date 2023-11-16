@@ -6,6 +6,7 @@ export async function POST(request: Request) {
  
   const body = await request.json();
   const { username, url,socketId } = body;
+  console.log(`this is the id in the route  ${socketId}`);
   
 
   
