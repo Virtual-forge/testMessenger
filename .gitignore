@@ -35,4 +35,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/back/node_modules
+/messenger/node_modules
+/messenger/back/node_modules

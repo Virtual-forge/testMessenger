@@ -9,17 +9,44 @@ const {
 
 const http = require('http');
 const { PrismaClient } = require("@prisma/client");
+const io = require('socket.io')(3003 , {
+  cors:{
+    origin: "http://localhost:3000"
+  }
+});
 
-const socketIO = require('socket.io');
 const app = express();
 const port = process.env.PORT || 3001;
-const server = http.createServer(app);
-const io = socketIO(server);
+
+
 
 app.use(cors());
 app.use(express.json()); // Use JSON middleware for parsing request bodies
 
 const prisma = new PrismaClient();
+
+
+
+io.on('connection', (socket) => {
+  console.log(`Socket connection: ${socket.id}`);
+
+  // Listen for messages from the client
+  socket.on('messageToServer', (data) => {
+    console.log('Received message from client:', data);
+
+    // Send a response back to the client
+    io.emit('messageFromServer', ` ${data}`);
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log(`socket disconnected ${socket.id}`);
+  });
+});
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html'); // Update the path accordingly
+});
+
 
 // Define API routes
 app.post('/api/generateResponseWithFile', async (req, res) => {
@@ -59,16 +86,17 @@ app.post('/api/find_user', async (req, res) => {
 });
 
 app.post('/api/initializebot', async (req, res) => {
-  const { username , url } = req.body;
+  const { username , url , socketId } = req.body;
   const key = 'key';
   try {
-    const user = await initializebot(username,key,url,wss);
+    const user = await initializebot(username,key,url,socketId,io);
     res.json({ user });
   } catch (error) {
     console.error('Error finding user:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // Start the server
 app.listen(port, () => {

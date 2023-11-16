@@ -45,7 +45,7 @@ const chunkPage = (page,chunklist,url) => {
   }
 }
 
-async function learnWebsite (url , username , wss) {
+async function learnWebsite (url , username ,socketId,io) {
   try {
     
     
@@ -95,10 +95,11 @@ async function learnWebsite (url , username , wss) {
 
         const cleanedTextContent = removeDuplicates(textContent.trim().replace(/\s\s+/g, ' '));
         chunkPage(cleanedTextContent,chunklist,link);
-        wss.
-        console.log(`Text content extracted from: ${link}`); // Log text content extraction
+        io.to(socketId).emit('scrapingProgress', `Finished processing link ${link}: ${linkError}`);
+        
       } catch (linkError) {
-        console.error(`Error processing link ${link}: ${linkError}`);
+        
+        io.to(socketId).emit('scrapingProgress', `Error processing link ${link}: ${linkError}`);
         // Continue processing the next link even if there's an error with the current one
         continue;
       }
@@ -121,15 +122,15 @@ async function learnWebsite (url , username , wss) {
   });
 
   const responseText = `${summary.choices[0].message.content} phone number : ${phoneNumbers[0]}`;
-  let extraInfo = prompt('do you have any new information you want to add to your database ?(new offers or contact info ) \n type N if you don\'t want to add anything :');
-  let extra_info = '';
-  if(extraInfo =='N'){
-    extra_info = '';
-  }
-  else{
-     extra_info = extraInfo;
-  }
+  // let extraInfo = prompt('do you have any new information you want to add to your database ?(new offers or contact info ) \n type N if you don\'t want to add anything :');
   
+  // if(extraInfo =='N'){
+  //   extra_info = '';
+  // }
+  // else{
+  //    extra_info = extraInfo;
+  // }
+  let extra_info = '';
   const webform = await prisma.webscrap.create({
     data : {url : url,
             username : username,
@@ -161,6 +162,7 @@ async function learnWebsite (url , username , wss) {
         await prisma.chunks.createMany({
           data: chunksToCreate,
         });
+        io.to(socketId).emit('scrapingProgress', `${counter} chunks sent out of ${chunklist.length}`);
         console.log(`${counter} chunks sent out of ${chunklist.length}`);
         const delayBetweenRequestsMs = 60 * 1000 ;
         await delay(delayBetweenRequestsMs);

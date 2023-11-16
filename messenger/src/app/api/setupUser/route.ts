@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
+ 
+import { io, Socket } from "socket.io-client";
 
 export async function POST(request: Request) {
+ 
   const body = await request.json();
-  const { username, url } = body;
+  const { username, url,socketId } = body;
+  
 
+  
   try {
+    
+    
     const botReponse = await fetch('http://localhost:3001/api/initializebot', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        
       },
       body: JSON.stringify({
         username,
         url,
+       socketId
       }),
     });
 
