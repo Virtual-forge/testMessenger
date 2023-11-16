@@ -37,3 +37,4 @@ next-env.d.ts
 
 /messenger/node_modules
 /messenger/back/node_modules
+/messenger/.next
