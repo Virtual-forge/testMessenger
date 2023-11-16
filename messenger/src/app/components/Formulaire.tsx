@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io, Socket } from 'socket.io-client';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'
+
 
 
 function Formulaire() {
@@ -10,8 +11,9 @@ function Formulaire() {
   const [username, setUsername] = useState('');
   const [url, setUrl] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
+    
     let newSocket : Socket;
     if(!socket){
       newSocket = io('http://localhost:3003');
@@ -22,8 +24,14 @@ function Formulaire() {
     // Update UI by adding the new progress message to the state
     setProgressMessages((prevMessages) => [...prevMessages, progressMessage]);
   };
+  const handleScrapingFinished = () => {
+    console.log('Scraping Finished!');
+    // Navigate to the 'Chatbot' page
+    router.push('/Chatbot');
+  };
     // Listen for scraping progress
     socket?.on('scrapingProgress', handleScrapingProgress);
+    socket?.on('Finished', handleScrapingFinished);
 
     return () => {
       socket?.off('scrapingProgress', handleScrapingProgress);

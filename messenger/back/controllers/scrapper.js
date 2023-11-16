@@ -176,7 +176,7 @@ async function learnWebsite (url , username ,socketId,io) {
   
     await browser.close();
     console.log(`Browser closed`); // Log browser close
-
+    io.to(socketId).emit('Finished', `Done`);
     
     return 'success';
   } catch (err) {
