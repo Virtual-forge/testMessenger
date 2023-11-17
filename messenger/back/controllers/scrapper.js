@@ -15,9 +15,9 @@ const removeDuplicates = (text) => {
   const uniqueLines = [...new Set(lines)]; // Create a Set to filter out duplicates
   return uniqueLines.join('\n').trim(); // Join the unique lines back into a single string
 };
-const isPhoneNumber = (text) => {
+const isPhoneNumber = (text,io,socketId) => {
   // Check for a specific pattern that represents a phone number
-  
+  io.to(socketId).emit('scrapingProgressNo', `${text}`);
   return /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/.test(text);
 
 };
@@ -26,8 +26,9 @@ const extractPhoneNumbers = (text) => {
   const phoneNumbers = text.match(phoneNumberRegex);
   return phoneNumbers || [];
 };
-const isMailtoLink = (url) => {
+const isMailtoLink = (url,io,socketId) => {
   // Check if the URL starts with 'mailto:'
+  io.to(socketId).emit('scrapingProgressNo', `${url}`);
   return url.toLowerCase().startsWith('mailto:');
 };
 const chunkPage = (page,chunklist,url) => {
@@ -81,7 +82,7 @@ async function learnWebsite (url , username ,socketId,io) {
     let count = 1;
     for (const link of internalLinks) {
       try {
-        if (isPhoneNumber(link) || isMailtoLink(link)) {
+        if (isPhoneNumber(link,io,socketId) || isMailtoLink(link,io,socketId)) {
           console.log(`Skipping phone number or email link: ${link}`);
           phoneNumbers = extractPhoneNumbers(link);
           continue;
@@ -95,7 +96,7 @@ async function learnWebsite (url , username ,socketId,io) {
 
         const cleanedTextContent = removeDuplicates(textContent.trim().replace(/\s\s+/g, ' '));
         chunkPage(cleanedTextContent,chunklist,link);
-        io.to(socketId).emit('scrapingProgress', `Finished processing link : ${link}`);
+        io.to(socketId).emit('scrapingProgressAdd', `${link}`);
         
       } catch (linkError) {
         if(linkError){io.to(socketId).emit('scrapingProgress', `Error processing link ${link}: ${linkError}`);
@@ -165,7 +166,10 @@ async function learnWebsite (url , username ,socketId,io) {
         io.to(socketId).emit('scrapingProgress', `${counter} chunks sent out of ${chunklist.length}`);
         console.log(`${counter} chunks sent out of ${chunklist.length}`);
         const delayBetweenRequestsMs = 60 * 1000 ;
-        await delay(delayBetweenRequestsMs);
+        if(!(counter >= chunklist.length)){
+          await delay(delayBetweenRequestsMs);
+        }
+        
         chunksToCreate.length = 0; // Clear the batch
       }
      
@@ -173,10 +177,10 @@ async function learnWebsite (url , username ,socketId,io) {
       counter++;
       //add a global timer
     }
-  
+    io.to(socketId).emit('Finished', `Done`);
     await browser.close();
     console.log(`Browser closed`); // Log browser close
-    io.to(socketId).emit('Finished', `Done`);
+    
     
     return 'success';
   } catch (err) {

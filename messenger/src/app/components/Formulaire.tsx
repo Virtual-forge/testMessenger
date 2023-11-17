@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io, Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation'
-
-
+import { FaCheck, FaTimes } from 'react-icons/fa';
+import { MdOutlineFileUpload } from "react-icons/md";
 
 function Formulaire() {
   const [progressMessages, setProgressMessages] = useState([]);
@@ -22,17 +22,31 @@ function Formulaire() {
   const handleScrapingProgress = (progressMessage) => {
     console.log(progressMessage);
     // Update UI by adding the new progress message to the state
-    setProgressMessages((prevMessages) => [...prevMessages, progressMessage]);
+    setProgressMessages((prevMessages) => [...prevMessages, {type: 'Add' ,message: progressMessage}]);
   };
   const handleScrapingFinished = () => {
     console.log('Scraping Finished!');
+    socket?.off('scrapingProgress', handleScrapingProgress);
+    socket?.disconnect();
     // Navigate to the 'Chatbot' page
     router.push('/Chatbot');
   };
-    // Listen for scraping progress
-    socket?.on('scrapingProgress', handleScrapingProgress);
-    socket?.on('Finished', handleScrapingFinished);
+  const handleScrapingRemoveLink = (progressMessage) => {
+    console.log(progressMessage);
+    // Update UI by adding the new progress message to the state
+    setProgressMessages((prevMessages) => [...prevMessages, {type: 'No' ,message: progressMessage}]);
+  };
+   const handleChunkSent= (progressMessage) => {
+    console.log(progressMessage);
+    // Update UI by adding the new progress message to the state
+    setProgressMessages((prevMessages) => [...prevMessages, {type: 'Chunks' ,message: progressMessage}]);
+  };
 
+    // Listen for scraping progress
+    socket?.on('scrapingProgressAdd', handleScrapingProgress);
+    socket?.on('Finished', handleScrapingFinished);
+    socket?.on('scrapingProgressNo',handleScrapingRemoveLink);
+    socket?.on('scrapingProgress', handleChunkSent);
     return () => {
       socket?.off('scrapingProgress', handleScrapingProgress);
       socket?.disconnect();
@@ -105,13 +119,30 @@ function Formulaire() {
           </div>
         </form>
         <div>
-          <h1 className='text-3xl text-center'>Scraping Progress : </h1>
+          <h1 className='text-3xl text-center '>Scraping Progress : </h1>
+          <div className='flex flex-col bg-gray-200 text-black rounded-lg p-2 max-w-md min-w-[500px] h-screen overflow-auto'>
           <ul>
-            
-            {progressMessages.map((message, index) => (
-              <li key={index}>{message}</li>
-            ))}
+          {progressMessages.map((message, index) => (
+            <li key={index}>
+              {message.type === 'Add' ? (
+                <div className='flex p-1 '>
+                  <FaCheck /> {message.message}
+                </div>
+              ) : message.type === 'No' ? (
+                <div className='flex p-1'>
+                  <FaTimes /> {message.message}
+                </div>
+              ) : message.type === 'Chunks' ? (
+                <div className='flex p-1'>
+                  <MdOutlineFileUpload /> {message.message}
+                </div>
+              ) : (
+                null
+              )}
+            </li>
+          ))}
           </ul>
+          </div>
         </div>
       </div>
     </div>
