@@ -9,7 +9,7 @@ const axios = require('axios');
 const  learnWebsite  = require('./controllers/scrapper');
 
 
-const key = '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';
+const key = ;
 
     async function callOpenAPI(conversation) {
         const outputChunks = [];
